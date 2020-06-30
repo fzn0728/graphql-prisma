@@ -5,3 +5,12 @@ const prisma = new Prisma({
     endpoint: 'http://192.168.99.100:4466/'
 })
 
+// prisma.query prisma.mutation prisma.subscription prisma.exists
+
+prisma.query.users( null, '{ id name posts{ id title } }').then((data)=> {
+    console.log(JSON.stringify(data, undefined, 2))
+})
+
+prisma.query.comments( null, '{ id text author { id name } }').then((data)=>{
+    console.log(JSON.stringify(data,undefined,2))
+})
