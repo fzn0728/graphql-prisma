@@ -7,7 +7,21 @@ const prisma = new Prisma({
 
 // prisma.query prisma.mutation prisma.subscription prisma.exists
 
-const createPostForUser = async ( authorId, data) => {
+//Example
+
+// prisma.exists.Comment({ // by default, prisma.exists include attr like object name
+//     id:"ckbvmdgh2001m0966f6o5wstg"
+// }).then((exists)=>{
+//     console.log(exists)
+// })
+
+const createPostForUser = async ( authorId, data ) => {
+    const userExists = await prisma.exists.User({ id: authorId })
+
+    if (!userExists) {
+        throw new Error('User not found')
+    }
+
     const post = await prisma.mutation.createPost ( {
         data: {
             ...data,
@@ -17,7 +31,7 @@ const createPostForUser = async ( authorId, data) => {
                 }
             }
         }
-    }, ' { id }')
+    }, ' { id }') // this is selection set
     const user = await prisma.query.user({
         where:{
             id: authorId
@@ -32,7 +46,35 @@ createPostForUser('ckbvll81s000k0966qn4rm9wh', {
     published: true
 }).then((user) => {
     console.log(JSON.stringify( user, undefined, 2))
+}).catch((error) => {
+    console.log(error.message)
 })
+
+
+const updatePostForUser = async( postId, data )=>{
+    const post = await prisma.mutation.updatePost({
+        where:{
+            id: postId
+        },
+        data
+    }, ' { author { id }}')
+    const user = await prisma.query.user({
+        where:{
+            id: post.author.id
+        }
+    }, '{ id name email posts { id title published }}')
+    return user
+}
+
+
+// updatePostForUser('ckbvm0ts7001109667hy3sgnd', {
+//     published: false
+// }).then((user) => {
+//     console.log(JSON.stringify( user, undefined, 2 ))
+// })
+
+
+
 
 
 // prisma.mutation.createPost({
